@@ -1,0 +1,107 @@
+---
+#Este playbook instala y configura todo lo necesario para correr MariaDB
+  - name: Instalar paquete MariaDB
+    hosts: all
+    gather_facts: yes
+    become: yes
+    tasks:
+      - name: Cargar variables de base de datos
+        include_vars:
+          file: "dbservers.yml"
+          
+      - name: Cargar variables de paquetes dependiendo de sistema
+        include_vars:
+          file: "{{ ansible_facts.distribution }}.yml"
+        
+      - name: Instalar epel-release en CentOS
+        package:
+          name: epel-release
+          state: latest
+        when: ansible_facts.distribution == "CentOS"
+
+      - name: Instalar paquetes acorde a sistema
+        package: 
+          name: "{{ packages }}" 
+          state: latest
+
+      - name: Configura SELinux para que MySQL inicie en cualquier puerto
+        seboolean: 
+          name: mysql_connect_any 
+          state: true 
+          persistent: yes
+        when: ansible_facts.distribution == "CentOS"  
+
+      - name: Crea '/root/.my.cnf' con credenciales root
+        template:
+          src: my.cnfroot.j2
+          dest: /root/.my.cnf
+          owner: root
+          mode: 0600
+        become: yes
+        notify: restart MySQL
+
+      - name: Crea archivo de configuracion MySQL
+        template: 
+          src: my.cnf.j2 
+          dest: "{{ ruta }}"
+        notify: restart mariadb
+
+      - name: Crea archivo de log de MariaDB
+        file: 
+         path: "{{ rutalog }}"
+         state: touch 
+         owner: mysql 
+         group: mysql 
+         mode: 0775
+
+      - name: Crea directorio MariaDB PID
+        file: 
+         path: /var/run/mysqld 
+         state: directory 
+         owner: mysql 
+         group: mysql 
+         mode: 0775
+
+      - name: Inicia servicio MariaDB
+        service: 
+         name: mariadb 
+         state: started 
+         enabled: yes
+
+      - name: Inicia firewalld
+        service: 
+         name: firewalld 
+         state: started 
+         enabled: yes
+
+      - name: Insertar regla firewalld
+        firewalld: 
+         port: "{{ mysql_port }}/tcp"
+         permanent: true 
+         state: enabled 
+         immediate: yes
+
+      - name: Crear base de datos de aplicación
+        mysql_db: 
+         name: "{{ dbname }}" 
+         state: present
+
+      - name: Crear usuario de aplicación de base de datos
+        mysql_user: 
+         name: "{{ dbuser }}" 
+         password: "{{ upassword }}" 
+         priv: "*.*:ALL"
+         host: '%' 
+         state: present
+        no_log: True
+        
+    handlers:
+      - name: restart mariadb
+        service: 
+          name: mariadb 
+          state: restarted
+
+      - name: restart MySQL
+        service: 
+          name: mysql 
+          state: restarted

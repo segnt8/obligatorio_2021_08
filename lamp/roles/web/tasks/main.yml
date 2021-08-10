@@ -1,0 +1,4 @@
+---
+#Ejecuta los dos playbooks para configurar apache, php y archivos index
+- include: install_httpd.yml
+- include: copy_code.yml

@@ -1,0 +1,29 @@
+---
+  - name: Copiar desde git y creación de index.php
+    hosts: all
+    gather_facts: yes
+    become: yes
+    tasks:
+      - name: Cargar variables de archivo
+        include_vars:
+          file: "all.yml"
+
+      - name: Cargar variables de paquetes 
+        include_vars:
+          file: "{{ ansible_facts.distribution }}.yml"
+
+      - name: Borrar archivo index.html para que git pueda copiar
+        file: 
+          path: /var/www/html/index.html
+          state: absent
+
+      - name: Copia código desde repositorio
+        git: 
+          repo: "{{ repository }}" 
+          dest: /var/www/html/
+          force: yes
+          
+      - name: Crea el archivo index.php
+        template: 
+          src: index.php.j2 
+          dest: /var/www/html/index.php

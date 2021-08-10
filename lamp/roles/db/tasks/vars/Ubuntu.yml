@@ -1,0 +1,7 @@
+#Paquetes específicos de Ubuntu
+packages:
+- python3-mysqldb
+- python3-semanage
+- mariadb-server
+ruta: /etc/mysql/my.cnf
+rutalog: /var/log/mysql/mysqld.log 

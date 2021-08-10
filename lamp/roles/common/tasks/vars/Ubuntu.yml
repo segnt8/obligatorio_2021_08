@@ -1,0 +1,7 @@
+---
+#Variables específicas de Ubuntu
+tiempo: chrony
+packages:
+          - python3-selinux
+          - python3-semanage
+          - firewalld

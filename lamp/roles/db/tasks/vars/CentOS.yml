@@ -1,0 +1,7 @@
+#Paquetes especificos de CentOS
+packages:
+- python3-mysql
+- python3-libsemanage
+- mariadb-server
+ruta: /etc/my.cnf
+rutalog: /var/log/mysqld.log 

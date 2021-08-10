@@ -1,0 +1,38 @@
+---
+#Mediante este playbook se instalarán dependencias, chrony y su configuración para CentOS y Ubuntu
+  - name: Instalación de paquetes
+    hosts: all
+    gather_facts: yes
+    become: yes
+    tasks:
+      - name:
+        include_vars:
+          file: "{{ ansible_facts.distribution }}.yml"
+    
+      - name: Instalar chrony en cada servidor
+        package:
+          name: chrony
+          state: present
+
+      - name: Instala dependencias en cada servidor
+        package:
+          name: "{{ packages }}"
+          state: present
+
+      - name: Configuración de archivo de chrony
+        template: 
+          src: chrony.conf.j2
+          dest: /etc/chrony.conf
+        notify: restart chrony
+
+      - name: Start the chrony service
+        service: 
+              name: "{{ tiempo }}"
+              state: started
+              enabled: true
+    handlers:
+      - name: restart chrony
+        service: 
+          name: "{{ tiempo }}"
+          state: restarted
+          

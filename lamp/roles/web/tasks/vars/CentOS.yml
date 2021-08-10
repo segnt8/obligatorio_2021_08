@@ -1,0 +1,12 @@
+packages:
+- httpd
+- php
+- php-mysqlnd
+httpd_port: 80
+ntpserver: 192.168.1.2
+repository: https://github.com/bennojoy/mywebapp.git
+web: httpd
+dbuser: foouser
+dbname: foodb
+upassword: abc
+dbserverip: 192.168.0.104

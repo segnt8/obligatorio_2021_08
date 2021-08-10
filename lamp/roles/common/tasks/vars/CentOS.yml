@@ -1,0 +1,7 @@
+---
+#Variables específicas de CentOS
+tiempo: chronyd
+packages:
+          - python3-libselinux
+          - python3-libsemanage
+          - firewalld

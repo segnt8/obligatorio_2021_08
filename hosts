@@ -1,0 +1,8 @@
+#[controlador]
+#controller ansible_connection=local
+
+[dbservers]
+obcentos ansible_host=192.168.0.104 ansible_user=ansible
+[webservers]
+obubuntu ansible_host=192.168.0.107 ansible_user=ansible
+

@@ -1,0 +1,51 @@
+---
+#Este playbook instala paquetes de apache y php
+
+  - name: Instalar apache y php
+    hosts: all
+    gather_facts: yes
+    become: yes
+    tasks:
+      - name: Cargar variables httpd
+        include_vars:
+          file: "all.yml"
+
+      - name: Cargar variables según distribución
+        include_vars:
+          file: "{{ ansible_facts.distribution }}.yml"
+
+      - name: Instala los paquetes de apache y php según distribución
+        package: 
+          name: "{{ packages }}" 
+          state: present
+
+      - name: Instalar dependencias web
+        package: 
+          name: git
+          state: present
+
+      - name: Iniciar firewalld
+        service: 
+         name: firewalld 
+         state: started 
+         enabled: yes
+
+      - name: Insertar regla httpd de firewalld
+        firewalld: 
+         port: "{{ httpd_port }}/tcp"
+         permanent: true 
+         state: enabled 
+         immediate: yes
+
+      - name: Iniciar servicio http
+        service: 
+          name: "{{ web }}"
+          state: started 
+          enabled: yes
+
+      - name: Configurar SELinux para permitir a apache que se conecte a base de dato remota
+        seboolean: 
+          name: httpd_can_network_connect_db 
+          state: true 
+          persistent: yes
+        when: ansible_facts.distribution == "CentOS"
